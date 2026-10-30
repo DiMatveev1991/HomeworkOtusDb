@@ -16,4 +16,24 @@ CREATE TABLE "Users" (
     "RegistrationDate" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE "Orders" (
+    "OrderID" INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    "UserID" INTEGER NOT NULL REFERENCES "Users" ("UserID"),
+    "OrderDate" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "Status" VARCHAR(50) NOT NULL DEFAULT 'Новый'
+);
+
+CREATE TABLE "OrderDetails" (
+    "OrderDetailID" INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    "OrderID" INTEGER NOT NULL REFERENCES "Orders" ("OrderID"),
+    "ProductID" INTEGER NOT NULL REFERENCES "Products" ("ProductID"),
+    "Quantity" INTEGER NOT NULL CHECK ("Quantity" > 0),
+    -- Стоимость всей позиции на момент покупки, а не текущая цена товара.
+    "TotalCost" NUMERIC(14, 2) NOT NULL CHECK ("TotalCost" >= 0)
+);
+
+CREATE INDEX "IX_Orders_UserID" ON "Orders" ("UserID");
+CREATE INDEX "IX_OrderDetails_OrderID" ON "OrderDetails" ("OrderID");
+CREATE INDEX "IX_OrderDetails_ProductID" ON "OrderDetails" ("ProductID");
+
 COMMIT;
